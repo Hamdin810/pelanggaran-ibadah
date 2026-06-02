@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Data Pelanggaran Ibadah Harian</title>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --green-dark:  #0d3320;
+      --green-mid:   #1a5c38;
+      --green-light: #2e8b57;
+      --green-pale:  #d6ede1;
+      --gold:        #c8a84b;
+      --gold-light:  #f0d98a;
+      --cream:       #fdf8ef;
+      --text-dark:   #1a1a1a;
+      --text-muted:  #6b7a6e;
+      --white:       #ffffff;
+      --shadow:      0 4px 24px rgba(13,51,32,0.13);
+      --radius:      14px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Tajawal',sans-serif;background:var(--cream);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:0 0 80px;}
+
+    /* HEADER */
+    header{width:100%;background:linear-gradient(135deg,var(--green-dark) 0%,var(--green-mid) 60%,var(--green-light) 100%);padding:32px 24px 24px;text-align:center;position:relative;overflow:hidden;}
+    header::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+    header .arabic{font-family:'Amiri',serif;font-size:1.3rem;color:var(--gold-light);opacity:.8;letter-spacing:4px;margin-bottom:8px;}
+    header h1{font-family:'Amiri',serif;font-size:clamp(1.4rem,4vw,2rem);color:#fff;font-weight:700;text-shadow:0 2px 8px rgba(0,0,0,.3);}
+    .periode-bar{margin-top:16px;display:inline-flex;align-items:center;gap:10px;background:rgba(255,255,255,.12);border:1.5px solid rgba(240,217,138,.35);border-radius:40px;padding:8px 18px;flex-wrap:wrap;justify-content:center;}
+    .periode-bar .lbl{font-size:.78rem;color:var(--gold-light);font-weight:700;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;}
+    .periode-bar select{background:transparent;border:none;outline:none;font-family:'Tajawal',sans-serif;font-size:.95rem;font-weight:700;color:#fff;cursor:pointer;appearance:none;padding-right:4px;}
+    .periode-bar select option{background:var(--green-dark);color:#fff;}
+    .periode-bar .sep{color:var(--gold-light);opacity:.5;}
+    .periode-bar .sem-badge{font-size:.75rem;background:var(--gold);color:var(--green-dark);border-radius:20px;padding:2px 10px;font-weight:800;}
+    .gold-line{height:3px;background:linear-gradient(90deg,transparent,var(--gold),transparent);width:100%;}
+
+    /* PERIODE INFO */
+    .periode-info{width:min(700px,95vw);margin-top:20px;background:linear-gradient(90deg,var(--green-dark),var(--green-mid));border-radius:12px;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 3px 14px rgba(13,51,32,.2);flex-wrap:wrap;gap:10px;}
+    .pi-lbl{font-size:.78rem;color:var(--gold-light);text-transform:uppercase;letter-spacing:1px;}
+    .pi-val{font-size:1.05rem;color:#fff;font-weight:700;margin-top:2px;}
+    .pi-sheet{background:rgba(255,255,255,.12);border:1px solid rgba(240,217,138,.3);border-radius:8px;padding:6px 14px;text-align:right;}
+    .pi-sheet .pi-val{font-size:.88rem;color:var(--gold-light);}
+
+    /* MAIN */
+    main{width:min(700px,95vw);margin-top:16px;display:flex;flex-direction:column;gap:20px;}
+
+    /* CARD */
+    .card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;border:1px solid rgba(46,139,87,.12);}
+    .card-header{background:linear-gradient(90deg,var(--green-pale),#fff);padding:16px 24px;border-bottom:2px solid var(--green-pale);display:flex;align-items:center;gap:12px;}
+    .card-header .icon{width:36px;height:36px;background:var(--green-mid);border-radius:10px;display:grid;place-items:center;font-size:1.1rem;flex-shrink:0;}
+    .card-header h2{font-size:.95rem;font-weight:700;color:var(--green-dark);}
+    .card-header p{font-size:.78rem;color:var(--text-muted);}
+
+    /* FORM SESI */
+    .sesi-body{padding:22px 24px;display:flex;flex-direction:column;gap:16px;}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media(max-width:500px){.form-row{grid-template-columns:1fr;}}
+    .field{display:flex;flex-direction:column;gap:5px;}
+    label{font-size:.75rem;font-weight:700;color:var(--green-dark);text-transform:uppercase;letter-spacing:.5px;}
+    label .req{color:var(--gold);margin-left:2px;}
+    input,select{font-family:'Tajawal',sans-serif;font-size:.93rem;color:var(--text-dark);background:#f9fbf9;border:1.5px solid #c9dfd0;border-radius:9px;padding:9px 13px;outline:none;transition:border-color .2s,box-shadow .2s;}
+    input:focus,select:focus{border-color:var(--green-light);background:#fff;box-shadow:0 0 0 3px rgba(46,139,87,.12);}
+    select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%232e8b57' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:36px;}
+
+    /* PEKAN */
+    .pekan-group{display:flex;gap:8px;flex-wrap:wrap;}
+    .pekan-btn{flex:1;min-width:60px;padding:9px 6px;border:1.5px solid #c9dfd0;border-radius:9px;background:#f9fbf9;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:.88rem;font-weight:700;color:var(--text-muted);transition:all .2s;}
+    .pekan-btn.active{background:var(--green-mid);color:#fff;border-color:var(--green-mid);box-shadow:0 2px 8px rgba(26,92,56,.25);}
+
+    /* PELANGGARAN CHECKBOX */
+    .pelanggaran-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+    @media(max-width:480px){.pelanggaran-grid{grid-template-columns:1fr;}}
+    .p-check{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1.5px solid #c9dfd0;border-radius:8px;cursor:pointer;transition:all .18s;background:#f9fbf9;}
+    .p-check:hover{border-color:var(--green-light);background:#f0f9f4;}
+    .p-check.checked{border-color:var(--green-mid);background:#e8f5ee;}
+    .p-check input[type=checkbox]{width:16px;height:16px;accent-color:var(--green-mid);cursor:pointer;flex-shrink:0;}
+    .p-check span{font-size:.78rem;color:var(--text-dark);line-height:1.3;}
+    .p-check.checked span{color:var(--green-dark);font-weight:600;}
+    .group-label{grid-column:1/-1;font-size:.7rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;padding:4px 2px 2px;border-bottom:1px solid var(--green-pale);}
+
+    /* INPUT LAINNYA */
+    #wrapLainnya{display:none;grid-column:1/-1;}
+    #wrapLainnya input{width:100%;}
+
+    /* TOMBOL TAMBAH SISWA */
+    .btn-add{display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border:2px dashed var(--green-light);border-radius:10px;background:transparent;cursor:pointer;font-family:'Tajawal',sans-serif;font-size:.92rem;font-weight:700;color:var(--green-mid);transition:all .2s;width:100%;}
+    .btn-add:hover{background:var(--green-pale);border-style:solid;}
+
+    /* DAFTAR SISWA */
+    .siswa-list{display:flex;flex-direction:column;gap:8px;}
+    .siswa-item{display:flex;align-items:flex-start;gap:10px;background:#f4faf6;border:1.5px solid var(--green-pale);border-radius:10px;padding:10px 14px;}
+    .siswa-item .si-info{flex:1;}
+    .siswa-item .si-nama{font-weight:700;font-size:.9rem;color:var(--green-dark);}
+    .siswa-item .si-kelas{font-size:.75rem;color:var(--text-muted);margin-top:1px;}
+    .siswa-item .si-pelanggaran{margin-top:5px;display:flex;flex-wrap:wrap;gap:4px;}
+    .p-tag{font-size:.68rem;background:var(--green-mid);color:#fff;padding:2px 8px;border-radius:12px;font-weight:600;}
+    .btn-hapus{background:none;border:none;cursor:pointer;font-size:1.1rem;color:#c0392b;padding:2px 4px;border-radius:6px;transition:background .15s;flex-shrink:0;}
+    .btn-hapus:hover{background:#fde8e8;}
+    .empty-list{text-align:center;padding:20px;color:var(--text-muted);font-size:.85rem;border:2px dashed #c9dfd0;border-radius:10px;}
+
+    /* TOMBOL SIMPAN */
+    .btn-submit{background:linear-gradient(135deg,var(--green-mid),var(--green-light));color:#fff;border:none;border-radius:10px;padding:14px;font-family:'Tajawal',sans-serif;font-size:1rem;font-weight:700;cursor:pointer;letter-spacing:.5px;transition:transform .15s,box-shadow .15s,filter .15s;box-shadow:0 4px 16px rgba(26,92,56,.3);display:flex;align-items:center;justify-content:center;gap:8px;width:100%;}
+    .btn-submit:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 6px 20px rgba(26,92,56,.38);}
+    .btn-submit:active{transform:translateY(0);}
+    .btn-submit:disabled{filter:grayscale(.5);cursor:not-allowed;transform:none;}
+    .btn-submit.count-badge::after{content:attr(data-count);background:rgba(255,255,255,.25);border-radius:12px;padding:1px 8px;font-size:.8rem;margin-left:4px;}
+
+    /* COUNTER */
+    .counter-bar{display:flex;gap:10px;flex-wrap:wrap;}
+    .counter-chip{flex:1;min-width:100px;background:var(--green-pale);border-radius:10px;padding:10px 14px;text-align:center;}
+    .counter-chip .cc-num{font-size:1.6rem;font-weight:800;color:var(--green-dark);}
+    .counter-chip .cc-lbl{font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+
+    /* TABLE */
+    .table-wrap{overflow-x:auto;}
+    table{width:100%;border-collapse:collapse;font-size:.8rem;}
+    thead tr{background:var(--green-dark);color:#fff;}
+    thead th{padding:10px 12px;text-align:left;font-weight:600;white-space:nowrap;}
+    tbody tr{border-bottom:1px solid var(--green-pale);}
+    tbody tr:hover{background:#f4faf6;}
+    tbody td{padding:8px 12px;color:var(--text-dark);}
+    .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.68rem;font-weight:700;text-transform:uppercase;}
+    .p1{background:#dbeaff;color:#1a4080;}.p2{background:#fde8c8;color:#7a4000;}.p3{background:#e8d5ff;color:#4a0080;}.p4{background:#d5ffe8;color:#005c2e;}
+    .empty-state{padding:28px;text-align:center;color:var(--text-muted);font-size:.88rem;}
+
+    /* CONFIG */
+    .config-inner{padding:20px 24px;}
+    .config-inner p{font-size:.83rem;color:var(--text-muted);margin-bottom:10px;line-height:1.7;}
+    .config-inner code{display:block;background:#1e1e2e;color:#a6e3a1;font-size:.75rem;padding:14px 16px;border-radius:9px;overflow-x:auto;white-space:pre;line-height:1.6;font-family:'Courier New',monospace;}
+    .url-field{display:flex;gap:8px;}
+    .url-field input{flex:1;}
+    .btn-save-url{background:var(--green-mid);color:#fff;border:none;border-radius:9px;padding:0 16px;cursor:pointer;font-family:'Tajawal',sans-serif;font-weight:700;font-size:.88rem;white-space:nowrap;transition:filter .2s;}
+    .btn-save-url:hover{filter:brightness(1.1);}
+    .step{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
+    .step-num{width:24px;height:24px;background:var(--green-mid);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:.72rem;font-weight:700;flex-shrink:0;margin-top:2px;}
+    .step p{margin-bottom:0;font-size:.83rem;color:var(--text-muted);line-height:1.6;}
+
+    /* TOAST */
+    #toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);padding:12px 24px;border-radius:40px;font-size:.88rem;font-weight:600;font-family:'Tajawal',sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.18);transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .35s;opacity:0;pointer-events:none;z-index:999;display:flex;align-items:center;gap:8px;}
+    #toast.show{transform:translateX(-50%) translateY(0);opacity:1;}
+    #toast.success{background:var(--green-mid);color:#fff;}
+    #toast.error{background:#c0392b;color:#fff;}
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="arabic">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+  <h1>Data Pelanggaran Ibadah Harian</h1>
+  <div class="periode-bar">
+    <span class="lbl">📅 Periode</span>
+    <select id="selBulan" onchange="updatePeriode()">
+      <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
+      <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
+      <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
+      <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
+    </select>
+    <span class="sep">|</span>
+    <input id="selTahun" type="number" min="2020" max="2099" onchange="updatePeriode()" oninput="updatePeriode()"
+      style="background:transparent;border:none;border-bottom:1.5px solid rgba(240,217,138,.6);outline:none;font-family:'Tajawal',sans-serif;font-size:.95rem;font-weight:700;color:#fff;width:62px;text-align:center;padding:2px 0;"/>
+
+  </div>
+</header>
+<div class="gold-line"></div>
+
+<div class="periode-info">
+  <div><div class="pi-lbl">Periode Aktif</div><div class="pi-val" id="periodeLabel">—</div></div>
+  <div class="pi-sheet"><div class="pi-lbl">Sheet Target</div><div class="pi-val" id="sheetLabel">—</div></div>
+</div>
+
+<main>
+
+  <!-- COUNTER -->
+  <div class="counter-bar">
+    <div class="counter-chip"><div class="cc-num" id="cntSiswa">0</div><div class="cc-lbl">Siswa</div></div>
+    <div class="counter-chip"><div class="cc-num" id="cntPelanggaran">0</div><div class="cc-lbl">Pelanggaran</div></div>
+    <div class="counter-chip"><div class="cc-num" id="cntSesi">0</div><div class="cc-lbl">Sesi Tersimpan</div></div>
+  </div>
+
+  <!-- FORM INPUT SESI -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">✏️</div>
+      <div><h2>Input Sesi Pelanggaran</h2><p>Isi waktu, tambah siswa, lalu simpan semua sekaligus</p></div>
+    </div>
+    <div class="sesi-body">
+
+      <!-- Pekan & Waktu -->
+      <div class="field">
+        <label>Pekan <span class="req">*</span></label>
+        <div class="pekan-group">
+          <button type="button" class="pekan-btn active" data-val="1" onclick="setPekan(1)">Pekan 1</button>
+          <button type="button" class="pekan-btn" data-val="2" onclick="setPekan(2)">Pekan 2</button>
+          <button type="button" class="pekan-btn" data-val="3" onclick="setPekan(3)">Pekan 3</button>
+          <button type="button" class="pekan-btn" data-val="4" onclick="setPekan(4)">Pekan 4</button>
+          <button type="button" class="pekan-btn" data-val="5" onclick="setPekan(5)">Pekan 5</button>
+        </div>
+        <input type="hidden" id="pekan" value="1"/>
+      </div>
+      <div class="form-row">
+        <div class="field"><label>Jam <span class="req">*</span></label><input type="time" id="jam" step="60" style="font-variant-numeric:tabular-nums;"/></div>
+        <div class="field"><label>Tanggal <span class="req">*</span></label><input type="date" id="tanggal" onchange="syncPeriodeFromTanggal()"/></div>
+      </div>
+
+      <hr style="border:none;border-top:1.5px solid var(--green-pale);"/>
+
+      <!-- Form Tambah Siswa -->
+      <div style="background:var(--green-pale);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:12px;">
+        <div style="font-size:.8rem;font-weight:800;color:var(--green-dark);text-transform:uppercase;letter-spacing:.5px;">➕ Tambah Siswa</div>
+        <div class="form-row">
+          <div class="field"><label>Nama <span class="req">*</span></label><input type="text" id="inNama" placeholder="Nama siswa..."/></div>
+          <div class="field"><label>Kelas <span class="req">*</span></label>
+            <select id="inKelas">
+              <option value="">— Kelas —</option>
+              <option value="X">X</option><option value="XI">XI</option><option value="XII">XII</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Checkbox Pelanggaran -->
+        <div class="field">
+          <label>Jenis Pelanggaran <span class="req">*</span> <span style="color:var(--text-muted);font-size:.7rem;text-transform:none;font-weight:400;">(bisa pilih lebih dari 1)</span></label>
+          <div class="pelanggaran-grid" id="pelanggaranGrid">
+            <div class="group-label">😴 Tidur</div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="TIDUR SAAT AL-MA'TSURAT"/><span>Tidur Saat Al-Ma'tsurat</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="TIDUR SAAT WIRID"/><span>Tidur Saat Wirid</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="TIDUR SAAT TILAWAH"/><span>Tidur Saat Tilawah</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="TIDUR SAAT AL-KAHFI"/><span>Tidur Saat Al-Kahfi</span></div>
+
+            <div class="group-label">🗣️ Berbicara / Bercanda</div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="BERBICARA SAAT WIRID"/><span>Berbicara Saat Wirid</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="BERBICARA SAAT KULTUM"/><span>Berbicara Saat Kultum</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="BERBICARA SAAT TILAWAH"/><span>Berbicara Saat Tilawah</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="BERBICARA SAAT AL-MA'TSURAT"/><span>Berbicara Saat Al-Ma'tsurat</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="BERCANDA SAAT TILAWAH"/><span>Bercanda Saat Tilawah</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="BERCANDA SAAT PEMBACAAN SHALAWAT"/><span>Bercanda Saat Shalawat</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="BERCANDA SEBELUM SHALAT"/><span>Bercanda Sebelum Shalat</span></div>
+
+            <div class="group-label">📖 Bacaan / Imam</div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="BACAAN WIRID IMAM TIDAK LANCAR"/><span>Bacaan Wirid Imam Tidak Lancar</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="BACAAN IMAM TIDAK LANCAR"/><span>Bacaan Imam Tidak Lancar</span></div>
+
+            <div class="group-label">😐 Tidak Serius / Tidak Hadir</div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="TIDAK SERIUS DALAM WIRID"/><span>Tidak Serius Dalam Wirid</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="TIDAK SERIUS DALAM MENYAMPAIKAN KULTUM"/><span>Tidak Serius Menyampaikan Kultum</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="TIDAK MEMPERHATIKAN SAAT KAJIAN"/><span>Tidak Memperhatikan Saat Kajian</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="TIDAK IKUT BERDO'A"/><span>Tidak Ikut Berdo'a</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="TIDAK MELAKSANAKAN TUGAS IBADAH"/><span>Tidak Melaksanakan Tugas Ibadah</span></div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="TIDAK BAWA AL-MA'TSURAT"/><span>Tidak Bawa Al-Ma'tsurat</span></div>
+
+            <div class="group-label">👕 Atribut</div>
+            <div class="p-check" onclick="toggleCheck(this)"><input type="checkbox" value="ATRIBUT TIDAK LENGKAP"/><span>Atribut Tidak Lengkap</span></div>
+
+            <div class="group-label">✏️ Lainnya</div>
+            <div class="p-check" onclick="toggleCheck(this)" id="checkLainnya"><input type="checkbox" value="LAINNYA"/><span>Lainnya (tulis manual)</span></div>
+            <div id="wrapLainnya"><input type="text" id="inLainnya" placeholder="Tulis jenis pelanggaran..."/></div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-add" onclick="tambahSiswa()">➕ Tambah ke Daftar</button>
+      </div>
+
+      <!-- Daftar Siswa -->
+      <div class="field">
+        <label>Daftar Siswa dalam Sesi Ini (<span id="jumlahSiswa">0</span> siswa)</label>
+        <div class="siswa-list" id="siswaList">
+          <div class="empty-list">Belum ada siswa ditambahkan</div>
+        </div>
+      </div>
+
+      <!-- Tombol Simpan Semua -->
+      <button type="button" class="btn-submit" id="btnSubmit" onclick="simpanSemua()">
+        💾 Simpan Semua ke Google Sheets
+      </button>
+    </div>
+  </div>
+
+  <!-- TABEL DATA TERBARU -->
+  <div class="card">
+    <div class="card-header">
+      <div class="icon">📊</div>
+      <div><h2>Data Terbaru — <span id="tableTitle">—</span></h2><p>5 data terbaru dari sheet aktif</p></div>
+    </div>
+    <div class="table-wrap">
+      <div id="tableContainer" class="empty-state">⚙️ Masukkan URL Apps Script untuk memuat data…</div>
+    </div>
+  </div>
+
+</main>
+<div id="toast"></div>
+
+<script>
+  const LS_URL = 'appsScriptUrl';
+  const FIXED_URL = 'https://script.google.com/macros/s/AKfycbxox8Yx13vw8AI-6sr6EbWccU1jVhIkXFttHBd7Hm4_cOwfkkZdJlOFeui2iUYnau3h/exec';
+  const LS_PER = 'aktivPeriode';
+  const BULAN  = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+  let daftarSiswa = [];   // [{nama, kelas, pelanggaran:[...]}, ...]
+  let totalTersimpan = 0;
+
+  // ── INIT ──
+  window.addEventListener('DOMContentLoaded', () => {
+    const now = new Date();
+    const saved = JSON.parse(localStorage.getItem(LS_PER)||'null');
+    if (saved) {
+      document.getElementById('selBulan').value = saved.bulan;
+      document.getElementById('selTahun').value = saved.tahun;
+
+    } else {
+      document.getElementById('selBulan').value = now.getMonth() + 1;
+      document.getElementById('selTahun').value = now.getFullYear();
+    }
+    updatePeriode();
+    document.getElementById('tanggal').value = now.toISOString().split('T')[0];
+    localStorage.setItem(LS_URL, FIXED_URL);
+    document.getElementById('appsScriptUrl').value = FIXED_URL;
+    loadRecentData(FIXED_URL);
+  });
+
+  function syncPeriodeFromTanggal() {
+    const val = document.getElementById('tanggal').value;
+    if (!val) return;
+    const d = new Date(val + 'T00:00:00');
+    document.getElementById('selBulan').value = d.getMonth() + 1;
+    document.getElementById('selTahun').value = d.getFullYear();
+    updatePeriode();
+  }
+
+  function getSheetName() {
+    const b = parseInt(document.getElementById('selBulan').value);
+    const t = document.getElementById('selTahun').value;
+    return `${BULAN[b]} ${t}`;
+  }
+
+  function updatePeriode() {
+    const b = parseInt(document.getElementById('selBulan').value);
+    const t = document.getElementById('selTahun').value;
+    const name = `${BULAN[b]} ${t}`;
+    const sem = b <= 6 ? 1 : 2;
+    localStorage.setItem(LS_PER, JSON.stringify({bulan:b, tahun:t}));
+    document.getElementById('periodeLabel').textContent = name;
+    document.getElementById('sheetLabel').textContent = name;
+    document.getElementById('semBadge').textContent = `Semester ${sem}`;
+    document.getElementById('tableTitle').textContent = name;
+    loadRecentData(FIXED_URL);
+  }
+
+  function setPekan(n) {
+    document.getElementById('pekan').value = n;
+    document.querySelectorAll('.pekan-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.val)===n));
+  }
+
+  // ── CHECKBOX PELANGGARAN ──
+  function toggleCheck(el) {
+    const cb = el.querySelector('input[type=checkbox]');
+    cb.checked = !cb.checked;
+    el.classList.toggle('checked', cb.checked);
+    // Toggle input lainnya
+    if (cb.value === 'LAINNYA') {
+      document.getElementById('wrapLainnya').style.display = cb.checked ? 'block' : 'none';
+    }
+  }
+
+  function getCheckedPelanggaran() {
+    const result = [];
+    document.querySelectorAll('#pelanggaranGrid .p-check input[type=checkbox]:checked').forEach(cb => {
+      if (cb.value === 'LAINNYA') {
+        const txt = document.getElementById('inLainnya').value.trim();
+        if (txt) result.push(txt);
+      } else {
+        result.push(cb.value);
+      }
+    });
+    return result;
+  }
+
+  function resetCheckboxes() {
+    document.querySelectorAll('#pelanggaranGrid .p-check').forEach(el => {
+      el.classList.remove('checked');
+      el.querySelector('input').checked = false;
+    });
+    document.getElementById('wrapLainnya').style.display = 'none';
+    document.getElementById('inLainnya').value = '';
+  }
+
+  // ── TAMBAH SISWA ──
+  function tambahSiswa() {
+    const nama = document.getElementById('inNama').value.trim();
+    const kelas = document.getElementById('inKelas').value;
+    const pelanggaran = getCheckedPelanggaran();
+
+    if (!nama)          { showToast('Isi nama siswa!', 'error'); return; }
+    if (!kelas)         { showToast('Pilih kelas!', 'error'); return; }
+    if (!pelanggaran.length) { showToast('Pilih minimal 1 pelanggaran!', 'error'); return; }
+
+    daftarSiswa.push({ nama, kelas, pelanggaran });
+    document.getElementById('inNama').value = '';
+    document.getElementById('inKelas').value = '';
+    resetCheckboxes();
+    renderDaftar();
+    updateCounter();
+    showToast(`✅ ${nama} ditambahkan`, 'success');
+  }
+
+  function hapusSiswa(idx) {
+    daftarSiswa.splice(idx, 1);
+    renderDaftar();
+    updateCounter();
+  }
+
+  function renderDaftar() {
+    const el = document.getElementById('siswaList');
+    document.getElementById('jumlahSiswa').textContent = daftarSiswa.length;
+    if (!daftarSiswa.length) {
+      el.innerHTML = '<div class="empty-list">Belum ada siswa ditambahkan</div>';
+      return;
+    }
+    el.innerHTML = daftarSiswa.map((s,i) => `
+      <div class="siswa-item">
+        <div class="si-info">
+          <div class="si-nama">${s.nama}</div>
+          <div class="si-kelas">Kelas ${s.kelas}</div>
+          <div class="si-pelanggaran">
+            ${s.pelanggaran.map(p=>`<span class="p-tag">${p}</span>`).join('')}
+          </div>
+        </div>
+        <button class="btn-hapus" onclick="hapusSiswa(${i})" title="Hapus">🗑️</button>
+      </div>`).join('');
+  }
+
+  function updateCounter() {
+    document.getElementById('cntSiswa').textContent = daftarSiswa.length;
+    const total = daftarSiswa.reduce((s,x) => s + x.pelanggaran.length, 0);
+    document.getElementById('cntPelanggaran').textContent = total;
+    document.getElementById('cntSesi').textContent = totalTersimpan;
+    const btn = document.getElementById('btnSubmit');
+    if (daftarSiswa.length) {
+      btn.setAttribute('data-count', `${daftarSiswa.length} siswa`);
+      btn.classList.add('count-badge');
+    } else {
+      btn.classList.remove('count-badge');
+    }
+  }
+
+  // ── SIMPAN SEMUA ──
+  async function simpanSemua() {
+    const url = FIXED_URL;
+    if (!daftarSiswa.length) { showToast('Tambah siswa dulu!', 'error'); return; }
+    const jam = document.getElementById('jam').value;
+    const tanggal = document.getElementById('tanggal').value;
+    const pekan = document.getElementById('pekan').value;
+    if (!jam || !tanggal) { showToast('Isi jam dan tanggal!', 'error'); return; }
+
+    // Expand: 1 siswa + banyak pelanggaran = banyak baris
+    const rows = [];
+    daftarSiswa.forEach(s => {
+      s.pelanggaran.forEach(p => {
+        rows.push({ pekan, jam, tanggal, nama: s.nama, kelas: s.kelas, jenisPelanggaran: p });
+      });
+    });
+
+    const btn = document.getElementById('btnSubmit');
+    btn.disabled = true;
+    btn.innerHTML = '<span>⏳</span> Menyimpan...';
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        body: JSON.stringify({ sheetName: getSheetName(), rows }),
+        headers: { 'Content-Type': 'text/plain' }
+      });
+      const json = await res.json();
+      if (json.status === 'success') {
+        totalTersimpan += daftarSiswa.length;
+        showToast(`✅ ${json.saved} baris tersimpan di sheet: ${getSheetName()}`, 'success');
+        daftarSiswa = [];
+        renderDaftar();
+        updateCounter();
+        loadRecentData(url);
+      } else {
+        showToast('❌ Gagal: ' + json.message, 'error');
+      }
+    } catch {
+      showToast('❌ Koneksi gagal. Cek URL & deployment.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '💾 Simpan Semua ke Google Sheets';
+    }
+  }
+
+  // ── LOAD TABLE ──
+  async function loadRecentData(url) {
+    url = FIXED_URL;
+    const el = document.getElementById('tableContainer');
+    el.innerHTML = '<div class="empty-state">⏳ Memuat data...</div>';
+    try {
+      const res  = await fetch(`${url}?sheet=${encodeURIComponent(getSheetName())}`);
+      const json = await res.json();
+      if (json.status === 'success' && json.rows && json.rows.length) {
+        renderTable(json.rows, json.total);
+      } else {
+        el.innerHTML = `<div class="empty-state">📭 Belum ada data untuk <strong>${getSheetName()}</strong>.</div>`;
+      }
+    } catch {
+      el.innerHTML = '<div class="empty-state">⚠️ Gagal memuat data.</div>';
+    }
+  }
+
+  function renderTable(rows, total) {
+    const cols = ['PEKAN','JAM','TANGGAL','NAMA','KELAS','JENIS PELANGGARAN'];
+    const bc = {'1':'p1','2':'p2','3':'p3','4':'p4'};
+    let html = `<table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>`;
+    rows.forEach(r => {
+      const pk = String(r['PEKAN']||'');
+      html += `<tr>
+        <td><span class="badge ${bc[pk]||'p1'}">Pekan ${pk}</span></td>
+        <td>${r['JAM']||''}</td><td>${r['TANGGAL']||''}</td>
+        <td><strong>${r['NAMA']||''}</strong></td>
+        <td>${r['KELAS']||''}</td><td>${r['JENIS PELANGGARAN']||''}</td>
+      </tr>`;
+    });
+    html += `</tbody></table><div style="padding:9px 14px;font-size:.76rem;color:var(--text-muted);background:var(--green-pale);">Total bulan ini: <strong>${total}</strong> pelanggaran</div>`;
+    document.getElementById('tableContainer').innerHTML = html;
+  }
+
+  function saveUrl() {
+    localStorage.setItem(LS_URL, FIXED_URL);
+    showToast('✅ URL sudah terpasang!', 'success');
+    loadRecentData(FIXED_URL);
+  }
+
+  function showToast(msg, type='success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = `show ${type}`;
+    setTimeout(() => { t.className = ''; }, 3500);
+  }
+</script>
+</body>
+</html>
